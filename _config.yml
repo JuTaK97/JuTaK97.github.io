@@ -16,10 +16,10 @@ minimal_mistakes_skin    : "default" # "air", "aqua", "contrast", "dark", "dirt"
 
 # Site Settings
 locale                   : "en-US"
-title                    : "공부한다."
+title                    : "세상 모든 것은 기록으로부터"
 title_separator          : "-"
 subtitle                 : # site tagline that appears below site title in masthead
-name                     : "양주현"
+name                     : "Novice Programmer"
 description              : "내가 아는 것과 모르는 것"
 url                      : "https://jutak97.github.io/"
 baseurl                  : # the subpath of your site, e.g. "/blog"
