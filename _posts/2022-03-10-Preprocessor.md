@@ -18,6 +18,7 @@ _```#include```_ <br />
 - Conditional compilation<br />
 _```#if```, ```#ifdef```, ```ifndef```, ```#elif```, ```#else```_<br />
 특정 조건에 따라 코드의 각 부분들이 프로그램에서 포함될지 제외될지를 결정한다. preprocessing 단계에서 이루어진다.
+
 ### 14.2 Preprocessing Directives
 - Directive 작성의 몇 가지 rule들
 1. Directive는 반드시 ```#```로 시작해야 한다. ```#``` 앞에 white space만 있다면 line의 시작이 꼭 아니어도 되지만, 
@@ -26,6 +27,8 @@ _```#if```, ```#ifdef```, ```ifndef```, ```#elif```, ```#else```_<br />
 3. Directive는 ```\n```이 나올 때 끝난다. 여러 줄에 걸쳐서 쓰고 싶으면. ```\```로 줄바꿈을 해서 쓴다.
 4. Directive는 프로그램의 어느 부분에서든 나와도 된다. 꼭 맨 앞일 필요는 없다.
 5. Directive 오른쪽에 주석은 써도 된다. 설명을 쓰는 것이 가독성에 좋다.
+
+
 ### 14.3 Macro Definition
 - Simple Macros
 아무 파라미터 없이, 단순한 replacement를 위한 macro이다.<br />
@@ -46,11 +49,15 @@ Preprocessor는 프로그램에서 저 형태의 코드를 발견했을 때, 예
 > i = MAX(j+k, m-n);
 > /* i = ((j+k)>(m-n) ? (j+k) : (m-n)) 과 동일 */
 > ```
+
+
 간편한 함수를 하나 만드는 것과 사실상 동일하다. <br /> <br />
 parameter가 없는 parameterized macro도 만들 수 있다.
 > ``` C
 > #define getchar() getc(stdin)
 > ```
+
+
 - parameterized macro의 장점
 1. function에 비해 빠르다. Run-time overhead가 없기 때문이다.
 2. Generic하다. 함수의 경우 argument의 타입이 정해져 있지만, macro는 그렇지 않다.
@@ -63,6 +70,8 @@ parameter가 없는 parameterized macro도 만들 수 있다.
 > #define MAX(x, y) ((x)>(y) ? (x) : (y))
 > int n = MAX(i++, j); 
 > ```
+
+
 이런 코드의 경우, 함수로 구현되었을 때는 i++가 당연히 한 번만 수행되지만, 매크로로 정의하면 (x)가 등장하는 두 군데에서 모두 ++ 연산을 하게 된다.<br /> 
 
 
