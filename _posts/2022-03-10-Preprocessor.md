@@ -1,5 +1,5 @@
 ---
-title : "14. The Preprocessor"
+title : "Chapter 14. The Preprocessor"
 categories : 
   - C
 tags :
@@ -10,13 +10,13 @@ last_modified_at: 2020-03-10T12:33:00-05:00
 ## Chapter 14. The Preprocessor
 ### 14.1 How the Preprocessor Works
 - Macro definition<br />
-_```#define```_ <br />
+```#define``` <br />
 marco를 정의하기 위한 directive이다. Preprocessor는 \#define을 통해 정의된 macro의 이름(=syntax)과 정의(=semantic)를 저장하고, 프로그램에서 매크로가 사용될 때 정의된 값으로 대체한다. <br />
 - File inclusion<br />
-_```#include```_ <br />
+```#include``` <br />
 특정 파일의 content를 해당 프로그램에 포함시킨다. <br/>
 - Conditional compilation<br />
-_```#if```, ```#ifdef```, ```ifndef```, ```#elif```, ```#else```_<br />
+```#if```, ```#ifdef```, ```ifndef```, ```#elif```, ```#else```<br />
 특정 조건에 따라 코드의 각 부분들이 프로그램에서 포함될지 제외될지를 결정한다. preprocessing 단계에서 이루어진다.
 
 ### 14.2 Preprocessing Directives
@@ -50,12 +50,11 @@ Preprocessor는 프로그램에서 저 형태의 코드를 발견했을 때, 예
 > /* i = ((j+k)>(m-n) ? (j+k) : (m-n)) 과 동일 */
 > ```
 
-
 간편한 함수를 하나 만드는 것과 사실상 동일하다. <br /> <br />
 parameter가 없는 parameterized macro도 만들 수 있다.
-> ``` C
-> #define getchar() getc(stdin)
-> ```
+>> ``` C
+>> #define getchar() getc(stdin)
+>> ```
 
 
 - parameterized macro의 장점
@@ -70,8 +69,6 @@ parameter가 없는 parameterized macro도 만들 수 있다.
 > #define MAX(x, y) ((x)>(y) ? (x) : (y))
 > int n = MAX(i++, j); 
 > ```
-
-
 이런 코드의 경우, 함수로 구현되었을 때는 i++가 당연히 한 번만 수행되지만, 매크로로 정의하면 (x)가 등장하는 두 군데에서 모두 ++ 연산을 하게 된다.<br /> 
 
 
