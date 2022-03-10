@@ -1,5 +1,4 @@
 ---
-title : "Chapter 14. The Preprocessor"
 categories : 
   - C
 tags :
