@@ -1,4 +1,6 @@
 ---
+title :
+  - Chapter 14. The Preprocessor
 categories : 
   - C
 tags :
@@ -6,7 +8,6 @@ tags :
 last_modified_at: 2020-03-10T12:33:00-05:00
 ---
 # K.N.KING - C PROGRAMMING *A Modern Approach*
-## Chapter 14. The Preprocessor
 ### 14.1 How the Preprocessor Works
 #### Macro definition<br />
 ```#define``` <br />
