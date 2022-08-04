@@ -134,7 +134,7 @@ suspend fun child() = coroutineScope {
     println("\t child suspend function end")
 }
 </div>
-세 개의 concurrent한 코루틴이 있다. 첫 번째는 main에서 2초를 기다려 checkpoint를 print하는 코루틴이다. 두 번째는 child에서 child job을 시작하고 2.5초를 기다린 후 끝내는 코루틴이다. 마지막으로 child 자체의 코루틴이 있다. 이들이 모두 병렬적으로 실행되기 때문에 출력 결과가 이렇게 나타난다.<br />
+세 개의 concurrent한 코루틴이 있다. 첫 번째는 main에서 2초를 기다려 checkpoint를 print하는 코루틴이다. 두 번째는 child에서 child job을 시작하고 2.5초를 기다린 후 끝내는 코루틴이다. 마지막으로 child 자체의 코루틴이 있다. 이들이 모두 병렬적으로 실행되기 때문에 출력 결과가 이렇게 나타난다.<br /><br />
 하지만 여기에 `job.join()`을 섞으면 상황이 복잡해진다. `val job`이 선언되는 순간은 병렬적으로 `launch{}` 내부의 코드가 실행되지만 `job.join()`을 하는 순간 마치 block을 하는 것처럼 되는 것이다.
 
 <div class="kotlin-code"  theme="darcula" >
@@ -244,7 +244,7 @@ fun main() = runBlocking {
         var i = 0
         while (i < 5) {
             if (System.currentTimeMillis() > startTime) {
-                yield()
+                yield()						// yield the thread to other coroutines
                 println("job: I'm sleeping ${i++} ...")
                 startTime += 1000L
             }
@@ -266,7 +266,7 @@ fun main() = runBlocking {
     var startTime = System.currentTimeMillis()
     val job = launch(Dispatchers.Default) {
         var i = 0
-        while (this.isActive) {
+        while (this.isActive) {		// check whether the coroutine is cancelled
             if (System.currentTimeMillis() > startTime) {
                 println("job: I'm sleeping ${i++} ...")
                 startTime += 1000L
@@ -280,7 +280,7 @@ fun main() = runBlocking {
 }
 </div>
 
-try-catch-finally를 사용해서 cancel됐을 때도, 정상적으로 끝났을 때도 모두 작동하는 코드를 넣을 수 있다. 보통 이곳에는 file close, job cancel 등 각종 리소스를 정리하는 코드를 넣게 되고, blocking하는 suspend function을 쓸 일은 잘 없다. Job이 cancel된 후에 `finally{}`에서의 suspend function 사용은 CancellationException을 부르게 되어 실행되지 않는다. 하지만 finally에서 suspend function을 사용해야 하는 특별한 경우에는 다음 방법을 사용할 수 있다.
+try-catch-finally를 사용하는 경우 보통 `finally{}`에는 file close, job cancel 등 각종 리소스를 정리하는 코드를 넣게 되고, blocking하는 suspend function을 쓸 일은 잘 없다. 애초에 job이 cancel된 후 `finally{}`에서의 suspend function 사용은 CancellationException을 일으키기 때문에 실행되지 않는다. 하지만 finally에서 suspend function을 사용해야 하는 특별한 경우에는 다음 방법을 사용할 수 있다.
 <div class="kotlin-code"  theme="darcula" >
 import kotlinx.coroutines.*
 
@@ -294,7 +294,7 @@ fun main() = runBlocking {
         } catch (e: CancellationException) {
             throw e
         } finally {
-            withContext(NonCancellable) {
+            withContext(NonCancellable) {		// Always active job
                 println("finally...(기 모으는 중)")
                 delay(3000L)
                 println("finished!!")
@@ -309,5 +309,99 @@ fun main() = runBlocking {
 </div>
 cancel되어 i=3에서의 반복문 수행은 CancellationException을 일으키고, catch되어 throw된 후 finally가 실행된다. 그리고 finally에서는 suspend function인 delay()가 사용되었다.
 
+### Timeout
+
+코루틴에서 cancel을 사용하는 가장 주된 이유는 실행 시간이 timeout을 초과했기 때문이다. <br />
+어떤 job을 계속 따라가면서, 또다른 코루틴으로는 특정 시간이 지나면 그 job을 취소하는 일을 하는 `withTimeout` 함수가 있다.
+<div class="kotlin-code"  theme="darcula" >
+import kotlinx.coroutines.*
+
+fun main() = runBlocking {
+    withTimeout(3500L) {
+        repeat(10) { i ->
+            println(i)
+            delay(1000L)
+        }
+    }
+}
+</div>
+실행해 보면 전과는 다르게 콘솔에 stack trace가 뜬다. 이전까지 뜨던 CancellationException은 취소된 코루틴 내에서 일어났고, 이는 정상적인 코루틴 completion으로 고려하기 때문에 따로 trace가 뜨지 않았다. 하지만 지금은 main 함수에서 CancellationException이 일어났기 때문에 stack trace가 표시된 것이다.<br />
+TimeoutCancellationException은 CancellationException의 subclass이고, 물론 try-catch를 이용해 timeout 후 추가적으로 할 일을 넣을 수 있다. 또는 `withTimeoutOrNull` 을 사용해서 timeout이 나면 null, 나지 않았으면 코드 내의 값을 반환받는 코드를 만들 수 있다.
+<div class="kotlin-code"  theme="darcula" >
+import kotlinx.coroutines.*
+
+fun main() = runBlocking {
+    val result = withTimeoutOrNull(3500L) {
+        repeat(10) { i ->
+            println(i)
+            delay(1000L)
+        }
+        "Done"
+    }
+    println(result)	// will get cancelled before it produces this result
+}
+</div>
+	
+`withTimeout()`은 asynchronous하다. 그렇기 때문에 block 밖에서는 release되어야 할 리소스를 관리하는 데 주의해야 한다.
+아래 코드에서는 `Resource`라는 클래스를 통해 리소스가 얼마나 반환되지 못하고 leak되는지 알아본다.
+<div class="kotlin-code"  theme="darcula" >
+var acquired = 0
+
+class Resource {
+    init { acquired++ } // Acquire the resource
+    fun close() { acquired-- } // Release the resource
+}
+
+fun main() {
+    runBlocking {
+        repeat(100_000) { // Launch 100K coroutines
+            launch { 
+                val resource = withTimeout(60) { // Timeout of 60 ms
+                    delay(50) // Delay for 50 ms
+                    Resource() // Acquire a resource and return it from withTimeout block     
+                }
+                resource.close() // Release the resource
+            }
+        }
+    }
+    // Outside of runBlocking all coroutines have completed
+    println(acquired) // Print the number of resources still acquired
+}
+</div>
+`launch{}`가 10만번 불리기 때문에 각 launch의 코루틴들은 전부 concurrent하다. 그리고 이들은 전부 main 쓰레드에서 실행되기 때문에 thread-safe하다. 혼잡하지 않다면 60ms가 지날 일이 없지만, 너무 많은 코루틴이 한 쓰레드에서 돌아가기 때문에 일부는 60ms를 넘겨서 exception을 내게 된다. 이 경우 `resource.close()`를 하지 못한 채 끝나게 되므로 결과 값은 거의 항상 양수가 된다.<br /><br />
+	
+이를 방지하기 위해서는 resource의 reference를 받아서 `finally{}`에서 리소스를 회수하면 된다.
+<div class="kotlin-code"  theme="darcula" >
+import kotlinx.coroutines.*
+
+var acquired = 0
+
+class Resource {
+    init { acquired++ } // Acquire the resource
+    fun close() { acquired-- } // Release the resource
+}
+
+fun main() {
+    runBlocking {
+        repeat(100_000) { // Launch 100K coroutines
+            launch { 
+                var resource: Resource? = null // Not acquired yet
+                try {
+                    withTimeout(60) { // Timeout of 60 ms
+                        delay(50) // Delay for 50 ms
+                        resource = Resource() // Store a resource to the variable if acquired      
+                    }
+                    // We can do something else with the resource here
+                } finally {  
+                    resource?.close() // Release the resource if it was acquired
+                }
+            }
+        }
+    }
+    // Outside of runBlocking all coroutines have completed
+    println(acquired) // Print the number of resources still acquired
+}
+</div>
+	
 [runBlocking]: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/run-blocking.html
 [coroutineScope]: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/coroutine-scope.html
