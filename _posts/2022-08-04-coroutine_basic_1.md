@@ -108,7 +108,11 @@ suspend fun scope2() = coroutineScope {
 ```
 scope1 이 끝날 때까지 scope2는 실행되지 않는다. 이런 점에서 `runBlocking{}`과 유사하지만 runBlocking은 쓰레드를 block하는 반면 coroutineScope는 단지 suspend하고, 쓰레드는 돌아갈 수 있게 풀어 놓는다.
 
-<script src="https://unpkg.com/kotlin-playground@1" data-selector=".kotlin-code"></script>
+<script src="https://unpkg.com/kotlin-playground@1" data-selector=".kotlin-code">
+	fun main() {
+	
+	}
+</script>
 
 
 [runBlocking]: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/run-blocking.html
