@@ -7,9 +7,9 @@ tags :
   - Kotlin
 last_modified_at: 2022-08-04T15:53:00+09:00
 ---
-```html
+
 <script src="https://unpkg.com/kotlin-playground@1" data-selector=".kotlin-code"></script>
-```
+
 
 ## Kotlin Coroutines 기초
 
@@ -114,6 +114,7 @@ suspend fun scope2() = coroutineScope {
 ```
 
 </div>
+
 scope1 이 끝날 때까지 scope2는 실행되지 않는다. 이런 점에서 `runBlocking{}`과 유사하지만 runBlocking은 쓰레드를 block하는 반면 coroutineScope는 단지 suspend하고, 쓰레드는 돌아갈 수 있게 풀어 놓는다.
 
 
