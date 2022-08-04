@@ -88,7 +88,7 @@ suspend fun sus2() {
 ### scope builder
 coroutine 내에서는 [coroutineScope]를 사용해서 새로운 coroutine scope를 만들 수 있다. coroutineScope{} 로 coroutine scope를 만들고, 이 scope에서 suspend block을 실행하게 된다.
 
-<div class="kotlin-code">
+<div class="kotlin-code"  theme="kotlin-dark" >
 	
 import kotlinx.coroutines.*
 
