@@ -20,14 +20,8 @@ import kotlinx.coroutines.*
 fun main() {
     println("main start")
     runBlocking {
-        launch {
-            delay(1000L)
-            println("1000 ms")
-        }
-        launch {
-            delay(500L)
-            println("500 ms")
-        }
+    	println("main block")
+        delay(3000L)
     }
     println("main end")
 }
@@ -108,6 +102,71 @@ suspend fun scope2() = coroutineScope {
 
 scope1 이 끝날 때까지 scope2는 실행되지 않는다. 이런 점에서 `runBlocking{}`과 유사하지만 runBlocking은 쓰레드를 block하는 반면 coroutineScope는 단지 suspend하고, 쓰레드는 돌아갈 수 있게 풀어 놓는다.
 
+## explicit job
+
+`launch{}`는 그 coroutine을 refer하는 Job을 반환한다. 그리고 `Job.join()` 을 이용해서 명시적으로 해당 코루틴이 끝날 때까지 기다리도록 할 수 있다. 아래 코드를 실행해 보자. <br />
+
+<div class="kotlin-code"  theme="darcula" >
+import kotlinx.coroutines.*
+
+fun main() = runBlocking {
+    println("main start")
+    launch {
+        delay(2000L)
+        println("main checkpoint")
+    }
+    child()
+    println("main end")
+}
+
+suspend fun child() = coroutineScope {
+    println("\t child suspend function start")
+
+    val job = launch {
+        println("\t\t child job start")
+        delay(2500L)
+        println("\t\t child job end")
+    }
+
+    delay(1000L)
+    println("\t child checkpoint 1")
+    delay(1000L)
+    println("\t child suspend function end")
+}
+</div>
+세 개의 concurrent한 코루틴이 있다. 첫 번째는 main에서 2초를 기다려 checkpoint를 print하는 코루틴이다. 두 번째는 child에서 child job을 시작하고 2.5초를 기다린 후 끝내는 코루틴이다. 마지막으로 child 자체의 코루틴이 있다. 이들이 모두 병렬적으로 실행되기 때문에 출력 결과가 이렇게 나타난다.<br />
+하지만 여기에 `job.join()`을 섞으면 상황이 복잡해진다. `val job`이 선언되는 순간은 병렬적으로 `launch{}` 내부의 코드가 실행되지만 `job.join()`을 하는 순간 마치 block을 하는 것처럼 되는 것이다.
+
+<div class="kotlin-code"  theme="darcula" >
+import kotlinx.coroutines.*
+
+fun main() = runBlocking {
+    println("main start")
+    launch {
+        delay(2000L)
+        println("main checkpoint")
+    }
+    child()
+    println("main end")
+}
+
+suspend fun child() = coroutineScope {
+    println("\t child suspend function start")
+
+    val job = launch {
+        println("\t\t child job start")
+        delay(2500L)
+        println("\t\t child job end")
+    }
+
+    delay(1000L)
+    println("\t child checkpoint 1")
+    job.join()		// Explicitly wait!!
+    delay(1000L)
+    println("\t child suspend function end")
+}
+</div>
+출력 순서가 달라진 것을 확인할 수 있다.
 
 [runBlocking]: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/run-blocking.html
 [coroutineScope]: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/coroutine-scope.html
