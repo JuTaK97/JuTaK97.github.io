@@ -145,6 +145,7 @@ suspend fun two(): Int {
     return 29
 }
 </div>
+  
 이제 add() 함수는 별도의 coroutineScope를 가지기 때문에 one()이나 two()에서 exception이 발생하면 add()의 coroutineScope 내의 모든 코루틴이 취소된다. 그리고 물론 one()과 two()는 병렬적으로 수행되기 때문에 걸린 시간은 1000ms 정도가 나온다. <br /><br />
  
 Cancellation도 코루틴 계층을 따라 전파된다.
