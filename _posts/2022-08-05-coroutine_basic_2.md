@@ -179,4 +179,5 @@ suspend fun failedConcurrentSum(): Int = coroutineScope {
   
 two에서 exception이 발생해서 `failedConcurrentSum`의 coroutineScope 내 모든 코루틴(one)이 취소되는 것을 확인할 수 있다.
   
+  
 [GlobalScope]: https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-global-scope/
